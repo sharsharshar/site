@@ -1,0 +1,712 @@
+/* ===========================================================================
+   style.css — whole site.
+
+   Sections:
+     1. tokens
+     2. base            — reset, body type, links
+     3. header          — masthead (notes) and page-head (home)
+     4. home page
+     5. notes page      — rail, note bodies, sidenotes, math
+     6. narrow screens
+     7. print
+
+   The measure lives on page wrappers, not on body: the notes page needs a
+   frame wider than its text column (rail + text + sidenote margin), so a
+   max-width on body would clamp it.
+=========================================================================== */
+
+
+/* --- 1. tokens ---------------------------------------------------------- */
+
+@font-face {
+  font-family: "Lastik";
+  src: url("../fonts/LastikFreeFont-Free.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --frame-home: 42rem;    /* ~75 characters in Charter */
+  --frame-notes: 78rem;   /* rail + text + sidenote margin, plus air */
+  --text: 46rem;          /* measure of the notes reading column */
+  --side: 18rem;          /* width of a sidenote */
+  --side-gap: 3.5rem;     /* space between text and sidenote */
+  --rail: 12.5rem;        /* width of the notes list on the left */
+  --pad: 1.5rem;          /* gutter either side of the frame */
+
+  --display: "Lastik", Georgia, serif;
+  --body: Charter, "Iowan Old Style", Georgia, serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --ink: #1a1a1a;
+  --ink-muted: #555;
+  --rule: #d8d8d8;
+  --title: #4684bf;       /* accent: note titles, sidenote numbers */
+  --link-hover: #0000cc;
+}
+
+
+/* --- 2. base ------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 4rem 0 5rem;
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: #fff;
+}
+
+a {
+  color: var(--ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--link-hover);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  background: #fff;
+  padding: 0.4rem 0.6rem;
+  z-index: 10;
+}
+
+
+/* --- 3. header ----------------------------------------------------------
+
+   Two variants of the same idea: name left, nav right, sharing a baseline.
+   .page-head is the home page, where the name is the page title;
+   .masthead is every other page, where it shrinks to a link back home.
+------------------------------------------------------------------------- */
+
+.page-head,
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  margin: 0 auto 2.5rem;
+  padding: 0 var(--pad);
+}
+
+.page-head {
+  max-width: var(--frame-home);
+}
+
+.masthead {
+  max-width: var(--frame-notes);
+}
+
+.page-head h1 {
+  font-family: var(--display);
+  font-size: 2.25rem;
+  font-weight: normal;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.masthead-name {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* a row with real space between links — no pipe characters, which stack into
+   a vertical stripe as soon as the nav wraps or turns into a column */
+.site-nav {
+  display: flex;
+  gap: 1.1rem;
+  font-size: 0.95rem;
+}
+
+
+/* --- 4. home page ------------------------------------------------------- */
+
+.home {
+  max-width: var(--frame-home);
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+.home p {
+  margin: 0 0 1.1rem;
+}
+
+.home ul {
+  margin: 1.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.home li {
+  margin-bottom: 0.35rem;
+}
+
+
+/* --- 5. notes page ------------------------------------------------------
+
+   Three bands, left to right: a sticky list of notes, the text column, and
+   the margin the sidenotes live in.
+------------------------------------------------------------------------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  gap: 0.5rem;
+  max-width: var(--frame-notes);
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+.note-index {
+  min-width: 0;
+}
+
+.note-index h1 {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: normal;
+  margin: 0 0 1.5rem;
+}
+
+/* the notes list (left rail) */
+.toc {
+  position: sticky;
+  top: 1.25rem;
+  align-self: start;
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.toc-heading {
+  margin: 0 0 0.6rem;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+.toc-list,
+.toc-sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-list > li {
+  padding: 0.3rem 0 0.3rem 0.6rem;
+  border-left: 1px solid var(--rule);
+}
+
+.toc-list a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.toc-list a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.toc-date {
+  display: block;
+  color: #8a8a8a;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+/* the current note gets the accent, and only it shows its subheadings */
+.toc-list > li.is-current {
+  border-left: 2px solid var(--title);
+  padding-left: calc(0.6rem - 1px);
+}
+
+.toc-list > li.is-current > a {
+  color: var(--title);
+}
+
+.toc-sub {
+  display: none;
+  margin: 0.35rem 0 0.1rem 0.15rem;
+  border-left: 1px solid var(--rule);
+}
+
+.toc-list > li.is-current > .toc-sub {
+  display: block;
+}
+
+.toc-sub li {
+  padding: 0.15rem 0 0.15rem 0.55rem;
+}
+
+.toc-sub a {
+  color: var(--ink-muted);
+}
+
+.toc-toggle {
+  display: none;
+  font: inherit;
+  font-size: 0.9rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  width: 100%;
+  text-align: left;
+  padding: 0 0 0.35rem;
+  margin-bottom: 0.6rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.toc-toggle::after {
+  content: " \25be";
+  color: var(--ink-muted);
+}
+
+.toc-toggle[aria-expanded="false"]::after {
+  content: " \25b8";
+}
+
+/* a note */
+.note-block {
+  max-width: var(--text);
+  scroll-margin-top: 1.25rem;
+}
+
+.note-inline-title {
+  font-family: var(--display);
+  color: var(--title);
+  font-size: 1.35rem;
+  font-weight: normal;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin: 0 0 0.25rem;
+  line-height: 1.2;
+}
+
+.note-inline-date {
+  font-style: italic;
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+}
+
+.note-source {
+  margin: -0.6rem 0 0.85rem;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.note-continues {
+  margin: -0.5rem 0 0.85rem;
+  font-size: 0.92rem;
+  font-style: italic;
+  color: #444;
+}
+
+.note-permalink {
+  margin-left: 0.45rem;
+  font-weight: normal;
+  color: #bbb;
+  text-decoration: none;
+  opacity: 0.55;
+  transition: opacity 0.12s, color 0.12s;
+}
+
+.note-permalink svg {
+  vertical-align: middle;
+  position: relative;
+  top: -0.12em;
+}
+
+.note-block:hover .note-permalink,
+.note-permalink:focus-visible {
+  opacity: 1;
+}
+
+.note-permalink:hover {
+  color: var(--link-hover);
+}
+
+.note-permalink.copied {
+  color: #2e7d32;
+  opacity: 1;
+}
+
+.note-permalink.copied::after {
+  content: " link copied";
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.note-sep {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  max-width: var(--text);
+  margin: 1.75rem 0;
+}
+
+/* note body */
+.note-body {
+  counter-reset: sidenote;
+}
+
+.note-body p,
+.note-body ul,
+.note-body ol {
+  margin: 0 0 0.9rem;
+}
+
+.note-body ul,
+.note-body ol {
+  padding-left: 1.2rem;
+}
+
+.note-body li {
+  margin-bottom: 0.35rem;
+}
+
+.note-body li:last-child,
+.note-body > :last-child {
+  margin-bottom: 0;
+}
+
+.note-body h3,
+.note-body h4 {
+  font-size: 1rem;
+  margin: 1.4rem 0 0.5rem;
+  scroll-margin-top: 1.25rem;
+}
+
+.note-body h4 {
+  font-style: italic;
+  font-weight: normal;
+}
+
+.note-body blockquote {
+  margin: 0 0 0.9rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--rule);
+  color: #333;
+}
+
+.note-body code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.note-body pre {
+  background: #f6f6f6;
+  border: 1px solid #e2e2e2;
+  border-radius: 4px;
+  padding: 0.75rem 0.9rem;
+  overflow-x: auto;
+  margin: 0 0 0.9rem;
+}
+
+.note-body pre code {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* tables scroll inside their own box instead of widening the column */
+.note-body .table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  margin: 0 0 1rem;
+}
+
+.note-body table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: max-content;
+  font-size: 0.92rem;
+}
+
+.note-body th,
+.note-body td {
+  border: 1px solid #ccc;
+  padding: 0.3rem 0.6rem;
+}
+
+.note-body th {
+  background: #f3f3f3;
+  text-align: left;
+}
+
+.note-body figure {
+  margin: 1.25rem 0;
+}
+
+.note-body img,
+.note-body svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.note-body figcaption {
+  font-size: 0.92rem;
+  font-style: italic;
+  color: #333;
+  margin-top: 0.5rem;
+}
+
+.note-body .note-diagram {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.note-body .note-callout {
+  border: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.note-body .note-centered {
+  text-align: center;
+}
+
+.note-body .note-centered p {
+  margin-bottom: 0.4rem;
+}
+
+/* `::: wide` escapes the measure — for a big table, plot, or diagram */
+.note-body .note-wide {
+  width: calc(var(--text) + var(--side-gap) + var(--side));
+  max-width: calc(100vw - 3rem);
+  margin: 1.5rem 0;
+}
+
+/* math */
+eq {
+  overflow-wrap: anywhere;
+}
+
+/* display math wider than the column scrolls sideways. Centering uses flex
+   `safe center` rather than text-align: a centered overflow spills equally
+   both ways and the left half becomes unreachable. */
+.note-body section {
+  display: flex;
+  justify-content: safe center;
+  margin: 1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.15rem;
+}
+
+.note-body section > eqn {
+  display: block;
+  min-width: 0;
+}
+
+.note-body .katex-display {
+  margin: 0;
+  overflow: visible;
+}
+
+/* sidenotes */
+.sidenote-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.sidenote-number,
+.margin-symbol {
+  cursor: pointer;
+  counter-increment: sidenote;
+}
+
+.sidenote-number::after {
+  content: counter(sidenote);
+  font-size: 0.7rem;
+  vertical-align: super;
+  line-height: 0;
+  color: var(--title);
+  padding-left: 0.06em;
+}
+
+.margin-symbol {
+  display: none;
+  color: var(--title);
+}
+
+.sidenote {
+  float: right;
+  clear: right;
+  width: var(--side);
+  margin-right: calc(-1 * (var(--side) + var(--side-gap)));
+  margin-bottom: 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #333;
+  text-align: left;
+  position: relative;
+}
+
+.sidenote::before {
+  content: counter(sidenote) " ";
+  font-size: 0.7rem;
+  vertical-align: super;
+  line-height: 0;
+  color: var(--title);
+}
+
+.sidenote.marginnote::before {
+  content: none;
+}
+
+.sidenote eq {
+  font-size: 0.95em;
+}
+
+.sidenote-toggle:focus-visible + .sidenote-number,
+.sidenote-toggle:focus-visible + .margin-symbol {
+  outline: 2px solid var(--link-hover);
+  outline-offset: 2px;
+}
+
+
+/* --- 6. narrow screens -------------------------------------------------- */
+
+/* no room for the rail: the list moves above the notes and collapses */
+@media (max-width: 1120px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    max-width: calc(var(--text) + var(--side-gap) + var(--side) + 3rem);
+  }
+
+  .toc {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .toc-heading {
+    display: none;
+  }
+
+  .toc-toggle {
+    display: block;
+  }
+
+  .toc-list {
+    columns: 2;
+    column-gap: 1.5rem;
+  }
+
+  .toc-list > li {
+    break-inside: avoid;
+  }
+
+  .toc-sub {
+    display: none !important;
+  }
+}
+
+/* no room for the margin: sidenotes fold into the text, opened by tapping
+   their number */
+@media (max-width: 900px) {
+  .layout {
+    max-width: calc(var(--text) + 3rem);
+  }
+
+  .margin-symbol {
+    display: inline;
+  }
+
+  .sidenote {
+    display: none;
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin: 0.7rem 0 1rem;
+    padding: 0.6rem 0.8rem;
+    border-left: 2px solid var(--rule);
+    background: #fafafa;
+  }
+
+  .sidenote-toggle:checked + .sidenote-number + .sidenote,
+  .sidenote-toggle:checked + .margin-symbol + .sidenote {
+    display: block;
+  }
+
+  .note-body .note-wide {
+    width: 100%;
+  }
+
+  .toc-list {
+    columns: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  :root { --pad: 1rem; }
+
+  body { margin-top: 2rem; }
+
+  .page-head h1 { font-size: 1.9rem; }
+}
+
+
+/* --- 7. print ----------------------------------------------------------- */
+
+@media print {
+  .toc,
+  .masthead,
+  .note-permalink {
+    display: none;
+  }
+
+  .sidenote {
+    display: block;
+    float: none;
+    width: auto;
+    margin: 0.6rem 0;
+    font-size: 0.8rem;
+    border-left: 2px solid var(--rule);
+    padding-left: 0.6rem;
+  }
+
+  .layout {
+    display: block;
+    max-width: none;
+  }
+}
